@@ -2,6 +2,8 @@
 
 I wanna make some extensible tetris game
 
+![](readme_assets/screenshot.png)
+
 It just a simple terminal tetris game.
 GUI runner may will add
 
