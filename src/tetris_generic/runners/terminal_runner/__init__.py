@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 
 from .terminal_runner import TerminalRunner
 from .formatted_text_surface import FormattedTextSurface
-import argparse
+from .key_map import KeyMap
 
-from ...default_impl import DEFAULT_SPACE_WIDTH, DEFAULT_SPACE_HEIGHT
+from tetris_generic.default_impl import DEFAULT_SPACE_WIDTH, DEFAULT_SPACE_HEIGHT
 
 
 def main():
@@ -39,5 +39,6 @@ def main():
 __all__ = [
     'main',
     'TerminalRunner',
-    'FormattedTextSurface'
+    'FormattedTextSurface',
+    'KeyMap'
 ]
