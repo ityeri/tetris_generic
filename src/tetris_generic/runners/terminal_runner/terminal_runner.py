@@ -18,6 +18,7 @@ from tetris_generic.default_impl import DefaultSpace, DefaultTetrominoSpawner, D
 from tetris_generic.event import events
 from tetris_generic.tetromino import Tetromino
 from .formatted_text_surface import FormattedTextSurface
+from .key_map import KeyMap
 
 
 class ExitedReason(Enum):
@@ -36,8 +37,6 @@ def draw_tetromino(surface: FormattedTextSurface, tetromino: Tetromino, text: On
                 surface_x, surface_y = game_x, surface.height - game_y - 1
 
                 if 0 <= surface_x < surface.width and 0 <= surface_y < surface.height:
-                    r, g, b = tetromino.type.filling_cell.get_display_color()
-
                     surface[surface_x, surface_y] = text
 
 
@@ -130,44 +129,31 @@ class TerminalRunner:
         self.last_tick_time: float = -1
         self.next_tick_time: float = -1
 
-        kb = key_binding.KeyBindings()
+        self.key_map = KeyMap(
+            self.game,
+            key_map={
+                ControlType.LEFT: [('a',), (Keys.Left,), ('h',)],
+                ControlType.RIGHT: [('d',), (Keys.Right,), ('l',)],
+                ControlType.DOWN: [('s',), (Keys.Down,), ('j',)],
+
+                ControlType.DROP: [(' ',), (Keys.Enter,)],
+
+                ControlType.ROTATE_RIGHT: [('w',), (Keys.Up,), ('k',)],
+                ControlType.ROTATE_LEFT: [('z',), ('i',)],
+            }
+        )
+        self.key_map.on_key()(lambda control_type: self.flush())
+
+        kb = self.key_map.create_key_bindings()
 
         @kb.add(Keys.ControlC)
         def on_exit(event: key_binding.KeyPressEvent):
             self.exited_reason = ExitedReason.TERMINATED
             self.stop()
 
-        kb.add('h')(self.control_left)
-        kb.add('j')(self.control_down)
-        kb.add('k')(self.control_rotate)
-        kb.add('l')(self.control_right)
-
-        kb.add(' ')(self.control_drop)
-
         self.app.key_bindings = kb
 
         self.exited_reason: ExitedReason | None = None
-
-
-    def control_left(self, event: key_binding.KeyPressEvent):
-        self.game.trigger_control(ControlType.LEFT)
-        self.flush()
-
-    def control_right(self, event: key_binding.KeyPressEvent):
-        self.game.trigger_control(ControlType.RIGHT)
-        self.flush()
-
-    def control_down(self, event: key_binding.KeyPressEvent):
-        self.game.trigger_control(ControlType.DOWN)
-        self.flush()
-
-    def control_rotate(self, event: key_binding.KeyPressEvent):
-        self.game.trigger_control(ControlType.ROTATE_RIGHT)
-        self.flush()
-
-    def control_drop(self, event: key_binding.KeyPressEvent):
-        self.game.trigger_control(ControlType.DROP)
-        self.flush()
 
 
     def on_tetromino_drop(self, event: events.TetrominoDropEvent):
